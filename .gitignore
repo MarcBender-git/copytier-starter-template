@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local claude config
 CLAUDE.local.md
+
+# Playwright MCP logs
+.playwright-mcp/

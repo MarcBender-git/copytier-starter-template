@@ -1,0 +1,473 @@
+/**
+ * PACK 2: Global Styles
+ * =====================
+ * Base stylesheet for contractor websites.
+ * Imports design tokens, sets resets, typography defaults,
+ * motion system, and utility classes.
+ *
+ * File location: src/styles/globals.css
+ * Loaded by:     src/app/layout.tsx via: import '@/styles/globals.css'
+ *
+ * IMPORT ORDER MATTERS — do not reorder:
+ *   1. tokens.css (CSS custom properties)
+ *   2. Tailwind directives
+ *   3. Base resets
+ *   4. Typography defaults
+ *   5. Motion system
+ *   6. Utility classes
+ */
+
+/* ── 1. Design Tokens ─────────────────────────────────────────────────────── */
+@import './tokens.css';
+
+/* ── 2. Tailwind Directives ───────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. BASE RESETS
+   Modern CSS reset layered on top of Tailwind's Preflight.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+
+  /* Box-sizing — Tailwind Preflight handles this, but explicit is better */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Document */
+  html {
+    /* Smooth scroll — but see reduced-motion override below */
+    scroll-behavior: smooth;
+    /* Prevent text size inflation on mobile orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Use hardware acceleration for scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    font-weight: var(--font-weight-normal);
+    /* Subpixel antialiasing for crisp text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent horizontal overflow on mobile */
+    overflow-x: hidden;
+    /* Space for fixed mobile call bar at bottom */
+    padding-bottom: var(--call-bar-height);
+  }
+
+  /* On desktop, remove mobile call bar padding */
+  @media (min-width: 1024px) {
+    body {
+      padding-bottom: 0;
+    }
+  }
+
+  /* Images — responsive by default */
+  img,
+  video,
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  /* Form elements inherit font */
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  /* Remove default button styling */
+  button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  /* Links */
+  a {
+    color: var(--color-text-link);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  a:hover {
+    color: var(--color-text-link-hover);
+  }
+
+  /* Focus visible — keyboard navigation only */
+  :focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+  /* Remove focus for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  /* Horizontal rule */
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-8) 0;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. TYPOGRAPHY DEFAULTS
+   Base heading styles, body text, and reading-mode elements.
+   All sizes reference CSS custom properties from tokens.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), system-ui, sans-serif;
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+    /* Prevent awkward single-word last lines */
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 4vw + 0.75rem, 3.052rem);
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: clamp(1.5rem, 3vw + 0.5rem, 2.441rem);
+    letter-spacing: -0.015em;
+  }
+  h3 {
+    font-size: clamp(1.25rem, 2.5vw + 0.25rem, 1.953rem);
+  }
+  h4 {
+    font-size: var(--font-size-2xl);  /* 1.563rem / 25px */
+  }
+  h5 {
+    font-size: var(--font-size-xl);   /* 1.25rem / 20px */
+  }
+  h6 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Paragraph and reading text */
+  p {
+    max-width: 65ch;  /* Optimal reading line length */
+    margin-bottom: var(--space-4);
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Lists */
+  ul, ol {
+    padding-left: var(--space-6);
+    margin-bottom: var(--space-4);
+  }
+  li {
+    margin-bottom: var(--space-2);
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* Strong / emphasis */
+  strong, b {
+    font-weight: var(--font-weight-semibold);
+  }
+  em, i {
+    font-style: italic;
+  }
+
+  /* Small text */
+  small {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  /* Blockquote — for testimonials */
+  blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--space-6);
+    margin: var(--space-8) 0;
+    font-size: var(--font-size-lg);
+    font-style: italic;
+    color: var(--color-text-secondary);
+  }
+  blockquote cite {
+    display: block;
+    font-style: normal;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  /* Code (rarely used on contractor sites) */
+  code {
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.9em;
+    background-color: var(--color-surface-alt);
+    padding: 0.1em 0.3em;
+    border-radius: var(--radius-sm);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. MOTION SYSTEM
+   Scroll-triggered animations and interaction transitions.
+   ALL animations must respect prefers-reduced-motion.
+   See references/motion-patterns.md for the full pattern library.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  /* Scroll animation base state — elements start invisible */
+  .scroll-animate {
+    opacity: 0;
+    /* Will be revealed by IntersectionObserver adding 'is-visible' class */
+  }
+
+  /* Revealed state — triggered by JS adding .is-visible */
+  .scroll-animate.is-visible {
+    animation: fadeIn 350ms ease-out both;
+  }
+
+  /* Stagger delays for grid children */
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 75ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 225ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 350ms; }
+
+  /* CTA pulse — mobile call button only */
+  .animate-pulse-glow {
+    animation: pulseGlow 2.5s ease-in-out infinite;
+  }
+}
+
+/* Keyframe definitions */
+@keyframes fadeIn {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  0%   { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  0%   { opacity: 0; transform: translateX(-16px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-accent-shadow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+/* ── CRITICAL: Reduced Motion Override ─────────────────────────────────────
+   This block must appear AFTER all animation/transition declarations.
+   It overrides everything above for users who request reduced motion.
+   Do not add exceptions — respect the user's preference completely.         */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Ensure scroll-animated elements are visible without animation */
+  .scroll-animate {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable CTA pulse */
+  .animate-pulse-glow {
+    animation: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. UTILITY CLASSES
+   Common patterns used across contractor site components.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  /* ── Touch target enforcement ─────────────────────────────────────────── */
+  /* Applied to all interactive elements via globals — WCAG 2.5.5 compliance */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Section containers ───────────────────────────────────────────────── */
+  .section-padding {
+    padding-top: var(--section-padding-y-mobile);
+    padding-bottom: var(--section-padding-y-mobile);
+  }
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-top: var(--section-padding-y-desktop);
+      padding-bottom: var(--section-padding-y-desktop);
+    }
+  }
+
+  /* Alternating section backgrounds */
+  .section-bg-primary  { background-color: var(--section-bg-1); }
+  .section-bg-alt      { background-color: var(--section-bg-2); }
+  .section-bg-brand    { background-color: var(--section-bg-brand); color: var(--color-text-inverse); }
+
+  /* ── Typography utilities ─────────────────────────────────────────────── */
+  /* Hero headline — fluid, uses CSS clamp */
+  .text-hero {
+    font-family: var(--font-heading), system-ui, sans-serif;
+    font-size: clamp(2rem, 5vw + 1rem, 3.815rem);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.025em;
+  }
+
+  /* Section overline label — e.g., "OUR SERVICES", "WHY CHOOSE US" */
+  .text-overline {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+  }
+
+  /* Wide body text — for intro paragraphs, readable without max-width constraint */
+  .text-intro {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-secondary);
+    max-width: 75ch;
+  }
+
+  /* ── NAP (Name, Address, Phone) — local SEO critical ─────────────────── */
+  /* Wrap the contractor's NAP block in this for consistent styling */
+  .nap-block {
+    color: var(--footer-nap-color);
+    font-style: normal;  /* Override browser default italic on <address> */
+    line-height: var(--line-height-relaxed);
+  }
+  .nap-block a {
+    color: inherit;
+  }
+  .nap-block a:hover {
+    color: #FFFFFF;
+  }
+
+  /* ── Trust signals ────────────────────────────────────────────────────── */
+  /* Inline trust indicators: ★ 4.9 | Licensed & Insured | Family Owned */
+  .trust-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+  .trust-bar-inverse {
+    color: var(--color-primary-100);
+  }
+  .trust-divider {
+    width: 1px;
+    height: 1rem;
+    background-color: var(--color-border);
+    flex-shrink: 0;
+  }
+
+  /* ── Gradient overlay (for hero background images) ────────────────────── */
+  .hero-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hero-overlay);
+    z-index: 1;
+  }
+  .hero-overlay > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── Screen reader only ───────────────────────────────────────────────── */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  .not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* ── Skip to content (accessibility) ─────────────────────────────────── */
+  .skip-link {
+    position: fixed;
+    top: -100%;
+    left: var(--space-4);
+    z-index: 9999;
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    transition: top var(--transition-fast);
+  }
+  .skip-link:focus {
+    top: var(--space-4);
+  }
+}
