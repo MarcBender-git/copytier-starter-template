@@ -32,20 +32,39 @@ The frontend-design plugin installed in Claude Code has strong creative instinct
 - Experimental layouts borrowed from SaaS products
 - Motion-heavy animations that distract from CTAs
 
-**Pack 2 overrides all of this.** Its job is to channel the plugin's genuine strengths — typography hierarchy, spatial rhythm, depth through shadows — while anchoring every decision to what converts for a California plumber, roofer, or HVAC company.
+**Pack 2 overrides all of this.** Its job is to channel the plugin's genuine strengths — typography hierarchy, spatial rhythm, depth through shadows — while anchoring every decision to what converts for the target industry.
 
-The aesthetic north star: **"Successful local business."** Think the professional who drives a clean truck, wears a uniform, and has 200 Google reviews. Not a startup. Not a design agency. Not a portfolio site.
+### Aesthetic North Star — Industry Aware
+
+**Check `siteConfig.niche` first:**
+
+**If niche is a HomeServiceNicheType** (plumber, hvac, electrician, etc.):
+The aesthetic north star is **"Successful local business."** Think the professional who drives a clean truck, wears a uniform, and has 200 Google reviews. Not a startup. Not a design agency. Not a portfolio site.
+
+**If niche is `'custom'` (out-of-niche build):**
+Read `siteConfig.industry.designStyle` and apply the matching aesthetic:
+
+| Design Style | Aesthetic North Star | Typography Character | Color Psychology | Spacing |
+|---|---|---|---|---|
+| `professional-clean` | "Trusted advisor" — clean, structured, credential-forward | Authoritative serif or clean sans, generous weight contrast | Blues, dark grays, muted accents. Trust over urgency | Generous whitespace, grid-strict |
+| `bold-creative` | "Results-driven creative" — confident, portfolio-forward | Strong display heading, clean body. Weight contrast matters | Saturated primaries, bold accent. Can use wider palette | Tighter spacing, more visual density |
+| `technical-precision` | "Engineering rigor" — data-friendly, structured, organized | Monospace or geometric heading, technical body font | Dark blues, grays, steel. Minimal warm tones | Dense but organized. Tables and data-friendly |
+| `warm-inviting` | "Welcoming caregiver" — approachable, human, caring | Rounded heading, highly readable body. Lighter weights | Warm neutrals, greens, soft blues. Calming palette | Generous padding, rounded corners, soft shadows |
+| `premium-luxury` | "Exclusive quality" — restrained, elegant, high-end | Thin serif heading, refined sans body. Minimal weight range | Black, white, gold/bronze accent. Very restrained | Maximum whitespace. Less is more |
+| `industrial-modern` | "Successful local business" — the existing Copytier default | Clean heading with authority, readable body | Blues/greens for trust, orange for CTA urgency | 8pt grid, conversion-focused density |
+
+The font banned list and color constraints from the home-service rules still apply as safety rails, but the specific color psychology table is replaced by the industry-appropriate palette guidance above.
 
 ---
 
 ## Design System Build Workflow
 
-### Step 1: Read siteConfig.branding
+### Step 1: Read siteConfig.branding + Industry Context
 
 Before writing a single line of CSS, read these fields from `site.config.ts`:
 
 ```typescript
-// Fields you need:
+// Fields you need (all builds):
 siteConfig.branding.colors.primary     // e.g., "#1D4ED8"
 siteConfig.branding.colors.accent      // e.g., "#F97316"
 siteConfig.branding.colors.neutral     // e.g., "#1E293B"
@@ -53,11 +72,17 @@ siteConfig.branding.colors.background  // e.g., "#FFFFFF"
 siteConfig.branding.fonts.heading      // e.g., "Oswald"
 siteConfig.branding.fonts.body         // e.g., "Source Sans 3"
 siteConfig.branding.imagery            // e.g., "photography" | "illustrated" | "minimal"
-siteConfig.niche                       // e.g., "plumbing" | "hvac" | "roofing" etc.
+siteConfig.niche                       // e.g., "plumber" | "hvac" | "custom"
 siteConfig.businessName                // Used for alt text defaults
+
+// Additional fields for out-of-niche builds (niche === 'custom'):
+siteConfig.industry?.type              // e.g., "professional-service" | "agency"
+siteConfig.industry?.designStyle       // e.g., "professional-clean" | "bold-creative"
 ```
 
 If any of these fields are missing or contain placeholder text like `[COLOR]`, **stop and report the gap** — do not invent values. Pack 1 must complete before Pack 2 runs.
+
+**Industry branching:** If `siteConfig.niche === 'custom'`, the `industry` section MUST exist. Use `industry.designStyle` to determine the aesthetic rules for Steps 2-6 instead of the contractor-specific defaults.
 
 ### Step 2: Validate Brand Colors
 
@@ -205,6 +230,8 @@ These rules are **explicit overrides** that take precedence over anything the fr
 
 ## Color Psychology by Niche
 
+### Home-Service Contractor Niches (niche ≠ 'custom')
+
 | Niche | Recommended Primary | Recommended Accent | Avoid |
 |---|---|---|---|
 | Plumbing | Deep blue (#1E3A5F, #1D4ED8) | Orange (#F97316) | Green (reads as lawn), Purple, Pink |
@@ -218,7 +245,20 @@ These rules are **explicit overrides** that take precedence over anything the fr
 | Pest Control | Forest green (#166534) or brown (#78350F) | Orange (#EA580C) | Bright pink, Lavender, Cyan |
 | General Contractor | Navy (#1E3A5F) or charcoal (#1E293B) | Bold orange (#EA580C) | Pastels, Purple, Neon |
 
-**Trust color universals:** Blues and greens signal trust, safety, and reliability — appropriate for any trade. Oranges signal urgency and action — ideal for CTAs. Reds signal emergency — use only for emergency-service badges, not primary brand color.
+### Industry Color Psychology (niche = 'custom')
+
+When `siteConfig.niche === 'custom'`, use the industry's `designStyle` to guide color validation:
+
+| Industry Type | Recommended Palette Direction | CTA Accent | Avoid |
+|---|---|---|---|
+| Professional Service (B2B) | Deep navy, dark gray, forest green — authority colors | Muted blue or green accent. Avoid "urgent" oranges. | Bright/playful colors, neon, pastels |
+| Agency / Creative | Bolder primaries permitted — the brand IS the statement | Strong contrast accent for portfolio CTAs | Generic blues (too corporate for agencies) |
+| Restaurant / Hospitality | Warm tones — deep reds, rich browns, olive greens | Warm gold or amber for reservation CTAs | Cold blues, clinical whites |
+| Healthcare / Medical | Clean blues, soft greens, white-dominant | Calming green or soft blue CTAs | Red (anxiety), black-heavy (clinical), bright yellows |
+| Nonprofit | Mission-aligned — earth tones, community greens, warm blues | Warm orange or green for donation CTAs | Corporate navy (reads as for-profit), neon |
+| E-commerce / Retail | Brand-driven — wider palette acceptable | High-contrast CTA for purchase actions | Low-contrast accents that hide the buy button |
+
+**Trust color universals (all industries):** Blues and greens signal trust, safety, and reliability — appropriate for any industry. Oranges signal urgency and action — ideal for CTAs. Reds signal emergency — use only for emergency-service badges, not primary brand color.
 
 ---
 

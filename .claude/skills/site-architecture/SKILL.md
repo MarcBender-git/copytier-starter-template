@@ -67,7 +67,11 @@ src/app/
 **Conditional routes** — only create if enabled in `siteConfig.features`:
 - `/faq` — if `siteConfig.features.faq === true`
 - `/blog` and `/blog/[slug]` — if `siteConfig.features.blog === true`
-- `/service-areas/[areaSlug]` — if `siteConfig.serviceAreas.length > 0`
+- `/service-areas/[areaSlug]` — if `siteConfig.serviceAreas.length > 0` AND (for out-of-niche builds) `siteConfig.industry?.seo?.serviceAreaPages !== false`
+
+**Out-of-niche route adjustments:**
+- If `siteConfig.niche === 'custom'` and `siteConfig.industry.seo.serviceAreaPages === false`, do NOT generate the `/service-areas/` directory
+- If the industry type warrants additional page types (e.g., `/portfolio`, `/case-studies`, `/menu`), create them based on `siteConfig.pages[]` entries — the pages array is the source of truth for all routes regardless of industry
 
 Never create empty or placeholder route files. If a feature is off, do not create the route.
 
@@ -128,7 +132,13 @@ See `references/page-template-specs.md` for per-page section requirements and mi
 
 ### Step 5: Section Flow Order (The Conversion Sequence)
 
-Section order is not negotiable — it follows established conversion patterns for home service websites. Pack 4 fills each section with components; Pack 3 defines the order by placing section scaffolds in the correct sequence.
+Section order follows established conversion patterns. Pack 4 fills each section with components; Pack 3 defines the order by placing section scaffolds in the correct sequence.
+
+**Check `siteConfig.niche` to determine which section flow to use:**
+
+#### Home-Service Builds (niche ≠ 'custom')
+
+Section order is not negotiable — it follows established conversion patterns for home service websites.
 
 **Homepage conversion sequence:**
 ```
@@ -166,6 +176,29 @@ Section order is not negotiable — it follows established conversion patterns f
 7. Nearby Areas      — internal links to adjacent service area pages
 8. Final CTA         — local urgency
 ```
+
+#### Out-of-Niche Builds (niche = 'custom')
+
+**Read `siteConfig.industry.homepageSections` for the homepage section flow.**
+This array defines the exact section order, populated by Pack 1 from industry research.
+
+Service pages and other interior pages still follow the general pattern of:
+Hero → Content → Proof → CTA — but the specific sections adapt to the industry.
+
+**If `industry.seo.serviceAreaPages` is `false`**, do NOT generate service area page routes or templates.
+
+**Reference section flows by industry type** (from `references/industry-defaults.md`):
+
+| Industry Type | Homepage Section Flow |
+|---|---|
+| `professional-service` | Hero → Client Logos → Services/Capabilities → Featured Case Study → Team/Credentials → Process → CTA → Testimonials → FAQ |
+| `agency` | Hero → Results Metrics → Portfolio/Case Studies → Services → Process → Team → Testimonials → Blog Preview → CTA |
+| `restaurant` | Hero → Menu Highlights → About/Story → Gallery → Location & Hours → Reviews → Reservation CTA |
+| `ecommerce` | Hero → Categories → Best Sellers → Social Proof → Brand Story → Newsletter Signup |
+| `healthcare` | Hero → Services → Credentials/Insurance → Provider Profiles → Testimonials → FAQ → Contact CTA |
+| `nonprofit` | Hero → Mission/Impact → Programs → Impact Data → Stories → Get Involved → Donate CTA |
+
+These are defaults. The `industry.homepageSections` array in `site.config.ts` is the actual source of truth — always use it over these defaults when it exists.
 
 ### Step 6: Generate sitemap.xml and robots.txt
 
@@ -237,6 +270,8 @@ Service and area slugs must be pre-defined in `siteConfig` — do not generate t
 
 What users see before scrolling is all that matters for conversion on first landing. Enforce these requirements by placing the correct section components first in each template.
 
+### Home-Service Builds (niche ≠ 'custom')
+
 | Page Type | Must Be Visible Before Scroll |
 |---|---|
 | Homepage | Business name, primary service, phone number, CTA button, one trust signal |
@@ -246,6 +281,21 @@ What users see before scrolling is all that matters for conversion on first land
 | About page | Business name, years in business, trust signal, team photo |
 
 **Mobile rule:** Phone number and "Call Now" button must be visible without ANY scrolling on a 375px viewport. This is non-negotiable — it is the highest-converting element on mobile contractor sites.
+
+### Out-of-Niche Builds (niche = 'custom')
+
+The above-the-fold elements change based on `industry.conversion.primaryAction`:
+
+| Primary Action | Must Be Visible Before Scroll |
+|---|---|
+| `phone` | Phone number, primary CTA, one trust signal (same as home-service) |
+| `form` | Headline, primary CTA button, one trust signal. Form can be below fold. |
+| `booking` | Headline, booking/reservation CTA, key info (hours, location) |
+| `meeting` | Value proposition headline, "Schedule a Consultation" CTA, client logos or credentials |
+| `demo` | Value proposition headline, "Request a Demo" CTA, social proof metric |
+| `purchase` | Product/hero image, price, "Add to Cart" CTA |
+
+**Mobile rule for out-of-niche:** The primary CTA (whatever `industry.conversion.primaryCTAText` says) must be visible without scrolling on a 375px viewport. If `industry.conversion.showPhoneInHeader` is true, the phone number must also be visible.
 
 ---
 

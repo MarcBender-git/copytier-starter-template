@@ -19,7 +19,7 @@ Content and SEO are built in a single pass. They are not separate disciplines �
 
 A headline written for the algorithm that reads like a keyword list will not convert. Copy that sounds great but ignores search intent will not rank. Neither serves the contractor. This skill produces copy that does both simultaneously: it speaks to the homeowner with a burst pipe at 11pm AND signals to Google exactly what this page covers.
 
-Every word on a contractor website must earn its place by doing at least one of:
+Every word on a website must earn its place by doing at least one of:
 - Reducing anxiety
 - Building trust
 - Driving a specific action
@@ -27,7 +27,27 @@ Every word on a contractor website must earn its place by doing at least one of:
 
 If it doesn't do at least one of those things, cut it.
 
+### Industry Context Awareness
+
+**Check `siteConfig.niche` before writing any copy:**
+
+**Home-service builds (niche ≠ 'custom'):**
 The contractor website context is unique: the visitor already has a problem. They're not browsing — they're deciding who to call. Copy that understands this urgency wins.
+
+**Out-of-niche builds (niche = 'custom'):**
+Read `siteConfig.industry.type` to set the copy context. Different industries have different visitor mindsets:
+
+| Industry Type | Visitor Mindset | Copy Tone |
+|---|---|---|
+| `professional-service` | Evaluating expertise, comparing firms, assessing credentials | Authoritative, outcome-focused. Lead with credentials and results, not urgency |
+| `agency` | Looking for creative partners, evaluating past work, seeking results | Confident, results-driven. Lead with portfolio outcomes and client impact |
+| `restaurant` | Deciding where to eat, checking menu/ambiance/reviews | Warm, sensory, inviting. Lead with atmosphere and food quality |
+| `ecommerce` | Shopping, comparing products, checking reviews/prices | Clear, benefit-focused. Lead with product value and social proof |
+| `healthcare` | Seeking care, evaluating providers, checking insurance/credentials | Empathetic, reassuring. Lead with patient outcomes and provider credentials |
+| `nonprofit` | Evaluating mission alignment, considering involvement/donation | Mission-driven, impact-focused. Lead with stories and measurable impact |
+
+Use `siteConfig.industry.conversion.primaryAction` to determine CTA language patterns.
+Use `siteConfig.industry.trustSignals` to determine which trust elements to weave into copy.
 
 ---
 
@@ -125,6 +145,8 @@ Reference `references/schema-templates.md` for complete copy-paste templates.
 
 Required schema by page type:
 
+**Home-service builds (niche ≠ 'custom') — use `siteConfig.schemaType` as the LocalBusiness subtype:**
+
 | Page Type | Required Schema Types |
 |-----------|----------------------|
 | Homepage | LocalBusiness + AggregateRating (if reviews exist) |
@@ -134,6 +156,19 @@ Required schema by page type:
 | Contact page | LocalBusiness + BreadcrumbList |
 | Standalone FAQ | LocalBusiness + FAQPage |
 | Blog post | Article + BreadcrumbList + LocalBusiness |
+
+**Out-of-niche builds (niche = 'custom') — use `siteConfig.industry.schemaType` as the primary type:**
+
+| Page Type | Required Schema Types |
+|-----------|----------------------|
+| Homepage | `[industry.schemaType]` + AggregateRating (if reviews exist) |
+| Service/capability page | `[industry.schemaType]` + Service + FAQPage + BreadcrumbList |
+| About page | `[industry.schemaType]` + BreadcrumbList |
+| Contact page | `[industry.schemaType]` + BreadcrumbList |
+| Portfolio/case study | `[industry.schemaType]` + Article + BreadcrumbList |
+| Blog post | Article + BreadcrumbList + `[industry.schemaType]` |
+
+Note: For non-local businesses (`industry.seo.localSEO === false`), use `Organization` as a fallback if `industry.schemaType` doesn't extend `LocalBusiness`. For local businesses, always use `LocalBusiness` or a valid subtype.
 
 Schema is implemented as a typed React component returning `<script type="application/ld+json">`. See schema-templates.md for the exact component pattern. Never leave placeholder values in published schema — invalid JSON-LD provides zero benefit.
 
@@ -157,6 +192,10 @@ Verify all checkpoints before handoff to Pack 6. See Section 8 for the full chec
 
 ### The Headline Formula
 
+**Check `siteConfig.niche` for the appropriate formula:**
+
+**Home-service builds (niche ≠ 'custom'):**
+
 **[Specific Outcome] + [Speed or Convenience Signal] + [Trust Qualifier]**
 
 ```
@@ -169,6 +208,21 @@ Verify all checkpoints before handoff to Pack 6. See Section 8 for the full chec
 ```
 
 The H1 must contain all three elements. If you can only fit two, drop the convenience signal and keep the outcome + trust qualifier.
+
+**Out-of-niche builds (niche = 'custom'):**
+
+The headline formula adapts per `industry.type`:
+
+| Industry Type | Headline Formula | Example |
+|---|---|---|
+| `professional-service` | **[Outcome] + [Credential] + [Differentiator]** | "Engineering Solutions That Stand the Test of Time — 30 Years, 500+ Projects" |
+| `agency` | **[Bold Result Claim] + [Proof Point]** | "We Build Brands That Outperform — $2.3B in Client Revenue Generated" |
+| `restaurant` | **[Sensory/Emotional Hook] + [Cuisine/Location]** | "Authentic Italian in the Heart of Sacramento" |
+| `healthcare` | **[Patient Outcome] + [Credential] + [Reassurance]** | "Compassionate Family Medicine — Board-Certified, Accepting New Patients" |
+| `nonprofit` | **[Mission Statement] + [Impact Metric]** | "Clean Water for Every Community — 1.2M Lives Changed Since 2010" |
+| `ecommerce` | **[Product Benefit] + [Social Proof]** | "Premium Outdoor Gear — Trusted by 50,000+ Adventurers" |
+
+The H1 must still contain at least two of: specific outcome, trust qualifier, and differentiator. Never use "Welcome to" as an H1 regardless of industry.
 
 ### Reading Level Standard
 
@@ -258,6 +312,10 @@ One paragraph like this outperforms any grid of badge icons. Use both, but the p
 
 ### Title Tag Format
 
+**Check `siteConfig.niche` to determine the title format:**
+
+**Home-service builds (niche ≠ 'custom'):**
+
 `[Primary Service] in [City] | [Company Name]`
 
 - **Length:** 50–60 characters exactly (Google truncates at ~60)
@@ -266,6 +324,22 @@ One paragraph like this outperforms any grid of badge icons. Use both, but the p
 - **City in title** — local ranking signal, non-negotiable
 - **Homepage variation:** `[Niche] in [City] | [Company Name]` (e.g., "Plumber in Sacramento | Valley Plumbing Co.")
 - **Service area page:** `[Service] in [Area City] | [Company Name]`
+
+**Out-of-niche builds (niche = 'custom'):**
+
+Read `siteConfig.industry.seo.titleFormat` for the title template. Common patterns:
+
+| Industry Type | Title Format | Example |
+|---|---|---|
+| `professional-service` | `[Page] \| [Company] — [Tagline]` | "Structural Engineering \| Acme Engineers — Building Confidence" |
+| `agency` | `[Page] \| [Company]` | "Our Work \| Spark Creative Agency" |
+| `restaurant` | `[Restaurant Name] — [Cuisine] in [City]` | "Trattoria Luna — Italian in Sacramento" |
+| `healthcare` | `[Service] \| [Practice Name] — [City]` | "Family Medicine \| Valley Health — Fresno" |
+| `nonprofit` | `[Page] \| [Organization Name]` | "Our Impact \| Clean Water Initiative" |
+
+- **Length rules remain:** 50–60 characters
+- **If `industry.seo.localSEO` is `true`:** City MUST appear in the title
+- **If `industry.seo.localSEO` is `false`:** City is optional — use it only if relevant
 
 ### Meta Description Format
 

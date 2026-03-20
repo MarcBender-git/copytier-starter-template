@@ -9,8 +9,8 @@
 // UNION TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Supported contractor niches */
-export type NicheType =
+/** Supported contractor niches (home-service industry) */
+export type HomeServiceNicheType =
   | 'plumber'
   | 'hvac'
   | 'electrician'
@@ -23,8 +23,18 @@ export type NicheType =
   | 'pool-spa';
 
 /**
- * schema.org @type value for LocalBusiness structured data.
- * Maps 1:1 with NicheType. Used in JSON-LD by Pack 5.
+ * NicheType — backward-compatible union.
+ * For home-service builds, use one of the HomeServiceNicheType values.
+ * For out-of-niche builds, use 'custom' and populate the `industry` config section.
+ */
+export type NicheType = HomeServiceNicheType | 'custom';
+
+/**
+ * schema.org @type value for structured data.
+ * For home-service builds: maps 1:1 with HomeServiceNicheType. Used in JSON-LD by Pack 5.
+ * For out-of-niche builds: use industry.schemaType (string) for full flexibility.
+ * This union covers home-service types. Additional types are supported via
+ * the industry.schemaType string field for out-of-niche builds.
  */
 export type SchemaOrgType =
   | 'Plumber'
@@ -35,7 +45,17 @@ export type SchemaOrgType =
   | 'HomeAndConstructionBusiness'
   | 'HousekeepingService'
   | 'GeneralContractor'
-  | 'Painter';
+  | 'Painter'
+  // Out-of-niche schema types — used when industry.type !== 'home-service'
+  | 'ProfessionalService'
+  | 'Restaurant'
+  | 'Store'
+  | 'LegalService'
+  | 'AccountingService'
+  | 'MedicalBusiness'
+  | 'RealEstateAgent'
+  | 'NGO'
+  | 'Organization';
 
 /** Visitor intent personas. Drives CTA strategy and headline copy. */
 export type PersonaType =
@@ -78,6 +98,148 @@ export type FormFieldType =
   | 'checkbox'
   | 'radio'
   | 'hidden';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INDUSTRY LAYER (Out-of-Niche Support)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Industry type identifier.
+ * 'home-service' = default Copytier contractor flow (uses niche + existing patterns).
+ * All other values trigger industry-specific overrides across skills.
+ */
+export type IndustryType =
+  | 'home-service'
+  | 'professional-service'
+  | 'agency'
+  | 'restaurant'
+  | 'ecommerce'
+  | 'healthcare'
+  | 'nonprofit'
+  | 'custom';
+
+/**
+ * The primary conversion action the site is optimized for.
+ * Drives CTA placement, form design, and hero layout across all packs.
+ */
+export type PrimaryActionType =
+  | 'phone'      // Home services, emergency trades — click-to-call dominates
+  | 'form'       // General lead gen — contact form is the primary conversion
+  | 'booking'    // Restaurants, salons, med spas — reservation/appointment
+  | 'meeting'    // B2B professional services — schedule a consultation
+  | 'demo'       // SaaS, technology — request a demo
+  | 'purchase';  // E-commerce, retail — add to cart / buy now
+
+/**
+ * Design aesthetic category.
+ * Controls color psychology rules, typography character, spacing density,
+ * and imagery treatment across Pack 2 (Design System).
+ */
+export type DesignStyleType =
+  | 'professional-clean'     // B2B services, engineering, consulting — clean grids, muted accents
+  | 'bold-creative'          // Agencies, creative studios — strong color, portfolio-forward
+  | 'technical-precision'    // Engineering, architecture, manufacturing — structured, data-friendly
+  | 'warm-inviting'          // Healthcare, restaurants, nonprofits — approachable, rounded elements
+  | 'premium-luxury'         // High-end services, luxury real estate — restrained palette, generous whitespace
+  | 'industrial-modern'      // Contractors, construction — the existing Copytier default
+  | 'custom';                // Fully custom — all overrides in site.config.ts
+
+/**
+ * Conversion configuration for the industry.
+ * Replaces the hardcoded contractor CTA patterns with industry-appropriate defaults.
+ */
+export interface IndustryConversionConfig {
+  /** The primary conversion action this site is optimized for */
+  primaryAction: PrimaryActionType;
+  /** Primary CTA button text, e.g. "Request a Consultation" or "Call Now — 24/7" */
+  primaryCTAText: string;
+  /** Secondary CTA button text, e.g. "View Our Projects" or "See Our Work" */
+  secondaryCTAText: string;
+  /** Whether to show the phone number prominently in the header (true for local service, often false for B2B) */
+  showPhoneInHeader: boolean;
+  /** Whether to show an emergency/urgency banner above navigation (true only for emergency services) */
+  showEmergencyBanner: boolean;
+  /** Form field names for the primary conversion form. Order matters — fields render in this order. */
+  formFields: string[];
+}
+
+/**
+ * Industry-specific trust signal tiers.
+ * Tier 1 = above the fold. Tier 2 = first scroll. Tier 3 = deeper on page.
+ * Skills read these to determine what trust elements to place where.
+ */
+export interface IndustryTrustSignals {
+  /** Trust signals displayed above the fold — highest impact, first impression */
+  tier1: string[];
+  /** Trust signals within the first scroll — builds credibility after initial interest */
+  tier2: string[];
+  /** Trust signals deeper on page — differentiators for the serious evaluator */
+  tier3: string[];
+}
+
+/**
+ * Industry-specific SEO configuration.
+ * Overrides contractor-specific title format and local SEO defaults.
+ */
+export interface IndustrySEOConfig {
+  /**
+   * Title tag format template. Use bracket tokens for dynamic replacement.
+   * Home-service: "[Service] in [City] | [Company]"
+   * B2B/Professional: "[Page] | [Company] — [Tagline]"
+   * E-commerce: "[Product] | [Company]"
+   */
+  titleFormat: string;
+  /** Whether local SEO signals are applied (NAP, service areas, LocalBusiness schema) */
+  localSEO: boolean;
+  /** Whether service area pages are generated (true only for local service businesses) */
+  serviceAreaPages: boolean;
+}
+
+/**
+ * IndustryConfig — the industry layer for out-of-niche builds.
+ *
+ * When `industry.type` is 'home-service', this section is optional and skills
+ * fall through to existing contractor-specific defaults.
+ *
+ * When `industry.type` is anything else, this section is REQUIRED and overrides
+ * contractor-specific behavior in every skill pack.
+ *
+ * Generated by Pack 1 using data from the industry research process.
+ */
+export interface IndustryConfig {
+  /** Industry identifier — skills read this to select behavior branches */
+  type: IndustryType;
+
+  /**
+   * schema.org @type for this industry — replaces the hardcoded contractor subtypes.
+   * Use the most specific type available.
+   * Examples: 'ProfessionalService', 'Restaurant', 'Store', 'LegalService'
+   */
+  schemaType: string;
+
+  /** Conversion configuration — replaces contractor-specific CTA patterns */
+  conversion: IndustryConversionConfig;
+
+  /** Design aesthetic — controls Pack 2 color psychology, typography, and spacing rules */
+  designStyle: DesignStyleType;
+
+  /**
+   * Ordered list of homepage section component names.
+   * Replaces the contractor homepage conversion sequence (Hero → Services → Testimonials → ...).
+   * Pack 3 reads this to scaffold the homepage layout.
+   * Examples:
+   *   B2B: ['hero', 'clientLogos', 'services', 'caseStudy', 'team', 'process', 'cta', 'testimonials', 'faq']
+   *   Agency: ['hero', 'resultMetrics', 'portfolio', 'services', 'process', 'team', 'testimonials', 'blog', 'cta']
+   *   Restaurant: ['hero', 'menuHighlights', 'about', 'gallery', 'location', 'reviews', 'reservationCTA']
+   */
+  homepageSections: string[];
+
+  /** Trust signal placement tiers — what appears where on the page */
+  trustSignals: IndustryTrustSignals;
+
+  /** SEO configuration — title format, local vs. national, service area page generation */
+  seo: IndustrySEOConfig;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ADDRESS & GEO
@@ -810,10 +972,27 @@ export interface FeatureFlags {
 export interface SiteConfig {
   /** Core business identity, address, hours, and social profiles */
   business: BusinessConfig;
-  /** Contractor niche — controls template selection, icon sets, and copy tone */
+  /**
+   * Contractor niche — controls template selection, icon sets, and copy tone.
+   * For home-service builds: use one of the HomeServiceNicheType values.
+   * For out-of-niche builds: set to 'custom' and populate the `industry` config.
+   */
   niche: NicheType;
   /** schema.org @type for LocalBusiness JSON-LD structured data */
   schemaType: SchemaOrgType;
+
+  /**
+   * Industry layer — REQUIRED for out-of-niche builds, OPTIONAL for home-service builds.
+   *
+   * When niche is a HomeServiceNicheType (plumber, hvac, etc.), this is optional.
+   * Skills fall through to existing contractor-specific defaults.
+   *
+   * When niche is 'custom', this is REQUIRED. Skills read industry.type to determine
+   * conversion patterns, design aesthetic, copy tone, section flow, and SEO strategy.
+   *
+   * Populated by Pack 1 using data from the industry research process.
+   */
+  industry?: IndustryConfig;
   /** Above-the-fold hero value proposition and primary CTAs */
   valueProposition: ValueProposition;
   /** Visitor persona definitions — drives copy strategy across the site */
